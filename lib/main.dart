@@ -1,22 +1,21 @@
-import 'package:expense_app/app_routes.dart';
-import 'package:expense_app/splash_screen.dart';
+import 'package:expense_app/domain/constants/app_routes.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp( MyApp());
+void main(){
+  runApp(MyApp());
 }
-
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MySplashPage(),
+      theme: ThemeData(
+        fontFamily: "Poppins"
+      ),
       initialRoute: AppRoutes.splashPage,
-      routes: AppRoutes.appRoutes,
+      routes: AppRoutes.myRoutes,
     );
   }
 }
-
-// 6674D3

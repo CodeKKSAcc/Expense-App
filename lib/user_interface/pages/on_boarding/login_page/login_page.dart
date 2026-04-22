@@ -1,5 +1,80 @@
+import 'package:expense_app/domain/constants/app_routes.dart';
+import 'package:expense_app/domain/utility/ui_helper.dart';
+import 'package:expense_app/user_interface/custom_widgets/app_rounded_button.dart';
+import 'package:flutter/material.dart';
+
+class LoginPage extends StatelessWidget {
+
+  TextEditingController emailControl = TextEditingController();
+  TextEditingController passwordControl = TextEditingController();
+
+  bool isPasswordVisible = false;
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Hi, Welcome back !", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),),
+              SizedBox(height: 21,),
+              TextField(
+                controller: emailControl,
+                decoration: myIpDecoration(
+                    myHintText: "Enter your email here...",
+                    myLabelText: "Email",
+                ),),
+              SizedBox(height: 15,),
+              StatefulBuilder(
+                builder: (context, mySetState) {
+                  return TextField(
+                    controller: passwordControl,
+                    obscureText: ! isPasswordVisible,
+                    decoration: myIpDecoration(
+                        myHintText: "Enter your password here...",
+                        myLabelText: "Password",
+                        isPasswordField: true,
+                        isPasswordVisible: isPasswordVisible,
+                        onTap: (){
+                          isPasswordVisible = ! isPasswordVisible;
+                          mySetState((){});
+                        }
+                    )
+                  );
+                }
+              ),
+              SizedBox(height: 15,),
+              AppRoundedButton(
+                  title: "Login",
+                  onTap: (){}),
+              SizedBox(height: 6,),
+              Center(
+                child: InkWell(
+                  onTap: (){
+                    Navigator.pushNamed(context, AppRoutes.signupPage);
+                  },
+                  child: Text.rich(TextSpan(text: "Don't have an account? ", style: TextStyle(fontSize: 15, color: Colors.black54),
+                      children: [TextSpan(text: "Create now", style: TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent
+                      )),]),),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 
+
+/*
 import 'package:expense_app/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,3 +160,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+*/
