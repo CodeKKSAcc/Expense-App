@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(DashboardPage());
-}
-
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
 

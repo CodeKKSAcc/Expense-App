@@ -7,6 +7,7 @@ class AppRoundedButton extends StatelessWidget {
   Color? bgColor;
   Color? fgColor;
   void Function() onTap;
+  bool isLoading;
 
   AppRoundedButton({
     this.buttonWidth = double.infinity,
@@ -14,7 +15,8 @@ class AppRoundedButton extends StatelessWidget {
     required this.title,
     this.bgColor,
     this.fgColor,
-    required this.onTap
+    required this.onTap,
+    this.isLoading = false
   });
 
   @override
@@ -31,7 +33,19 @@ class AppRoundedButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Text(title),
+        child: isLoading ? Padding(
+          padding: const EdgeInsets.all(4.5),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                color: Colors.white,
+              ),
+              SizedBox(width: 12,),
+              Text(title)
+            ],
+          ),
+        ) : Text(title),
       ),
     );
   }

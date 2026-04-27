@@ -25,12 +25,13 @@ class UserBloc extends Bloc<UserEvent, UserState>{
 
     on<UserLoginEvent>((event, emit) async{
       emit(UserLoadingState());
-      int value = await dbHelper.varifyUser(isMyUser: event.varifiedUser);
+      int value = await dbHelper.authUser(email: event.email, password: event.password);
       if(value == 1){
+        emit(UserFailureState(errorMsg: "Incorrect email !!!"));
+      } else if(value == 2){
+        emit(UserFailureState(errorMsg: "Incorrect password !!!"));
+      } else if(value == 3){
         emit(UserSuccessState());
-      }
-      else{
-        emit(UserFailureState(errorMsg: "User not found !!!"));
       }
     });
   }

@@ -1,6 +1,6 @@
 
 
-import 'package:expense_app/dashboard_page_ui.dart';
+import 'package:expense_app/user_interface/pages/dashboard/dashboard_page_ui.dart';
 import 'package:expense_app/home_page.dart';
 import 'package:expense_app/intro_page.dart';
 import 'package:expense_app/user_interface/pages/on_boarding/signup_page/signup_page.dart';

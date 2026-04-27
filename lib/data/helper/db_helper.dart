@@ -17,16 +17,18 @@ class DBHelper {
   static String db_name = "expensoDB.db";
 
   static String table_user = "users";
+
   static String column_user_id = "u_id";
   static String column_user_name = "u_name";
   static String column_user_email = "u_email";
   static String column_user_mob_no = "u_mob_no";
   static String column_user_password = "u_password";
-  static String column_user_budget = "u_id";
+  static String column_user_budget = "u_budget";
   static String column_user_balance = "u_balance";
   static String column_user_created_at = "u_created_at";
 
   static String table_expense = "expenses";
+
   static String column_expense_id = "e_id";
   static String column_expense_title = "e_title";
   static String column_expense_remark = "e_remark";
@@ -54,7 +56,7 @@ class DBHelper {
           "$column_user_name text, "
           "$column_user_email text, "
           "$column_user_mob_no text, "
-          "$column_user_password text. "
+          "$column_user_password text, "
           "$column_user_budget real, "
           "$column_user_balance real, "
           "$column_user_created_at text)",
@@ -75,14 +77,14 @@ class DBHelper {
     );
   }
 
-  Future<List<Map<String, dynamic>>> fetchAllUserData({required int userId}) async {
+  /*Future<List<Map<String, dynamic>>> fetchAllUserData({required int userId}) async {
     Database dbReference = await initDB();
     return await dbReference.query(
       table_user,
       where: "$column_user_id = ?",
       whereArgs: [userId],
     );
-  }
+  }*/
 
   // Create user
   Future<int> createUser({required UserModel newUserModel}) async {
@@ -107,30 +109,46 @@ class DBHelper {
     }
   }
 
-  Future<int> varifyUser({required UserModel isMyUser}) async {
-
-    bool emailExistCheck = await doesEmailExist(email: isMyUser.email);
-    bool passwordExistCheck = await doesPasswordMatched(
-      password: isMyUser.password,
-    );
-
-    // 1 -> Positive, verified user
-    // 0 -> Negative, unverified
-    if (emailExistCheck && passwordExistCheck) {
-      return 1;
-    } else {
-      return 0;
-    }
-  }
-
-  Future<bool> doesPasswordMatched({required String password}) async {
+  // Check's both email and password, but can't identify specifically which of two/both of them is incorrect.
+  /*Future<bool> authUser({required String email, required String password}) async {
     Database dbReference = await initDB();
-    List<Map<String, dynamic>> myUserPass = await dbReference.query(
+    List<Map<String, dynamic>> myUser = await dbReference.query(
       table_user,
-      where: "$column_user_password = ?",
-      whereArgs: [password],
+      where: "$column_user_email = ? and $column_user_password = ?",
+      whereArgs: [email, password],
     );
-    return myUserPass.isNotEmpty;
+    return myUser.isNotEmpty;
+  }*/
+
+  // 1-> Incorrect email
+  // 2-> Incorrect password
+  // 3-> Authenticated/varified user
+
+  Future<int> authUser({required String email, required String password}) async {
+    Database dbReference = await initDB();
+    List<Map<String, dynamic>> myUser = await dbReference.query(
+      table_user,
+      where: "$column_user_email = ? and $column_user_password = ?",
+      whereArgs: [email, password],
+    );
+
+    if(myUser.isEmpty){
+      List<Map<String, dynamic>> emailUser = await dbReference.query(
+        table_user,
+        where: "$column_user_email = ?",
+        whereArgs: [email],
+      );
+
+      if(emailUser.isNotEmpty){
+        return 2;
+      } else{
+        return 1;
+      }
+    }
+
+    else{
+      return 3;
+    }
   }
 
   Future<bool> doesEmailExist({required String email}) async {
@@ -142,4 +160,14 @@ class DBHelper {
     );
     return myUsers.isNotEmpty;
   }
+
+/*Future<bool> doesPasswordMatched({required String password}) async {
+    Database dbReference = await initDB();
+    List<Map<String, dynamic>> myUserPass = await dbReference.query(
+      table_user,
+      where: "$column_user_password = ?",
+      whereArgs: [password],
+    );
+    return myUserPass.isNotEmpty;
+  }*/
 }
