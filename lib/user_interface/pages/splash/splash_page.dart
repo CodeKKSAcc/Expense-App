@@ -1,20 +1,32 @@
 import 'dart:async';
 
+import 'package:expense_app/domain/constants/app_constants.dart';
 import 'package:expense_app/domain/constants/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SplashPage extends StatefulWidget {
-
   @override
   State<SplashPage> createState() => _SplashPageState();
 }
 
 class _SplashPageState extends State<SplashPage> {
-
   @override
   void initState() {
     super.initState();
-    Timer(Duration(seconds: 3), () => Navigator.pushReplacementNamed(context, AppRoutes.loginPage),);
+    Timer(
+      Duration(seconds: 3), () async{
+        SharedPreferences myPref = await SharedPreferences.getInstance();
+        int userId = myPref.getInt(AppConstants.pref_user_key) ?? 0;
+
+        String nextPage = AppRoutes.loginPage;
+
+        if(userId > 0){
+          nextPage = AppRoutes.dashboardPage;
+        }
+        Navigator.pushReplacementNamed(context, nextPage);
+      }
+    );
   }
 
   @override
@@ -33,7 +45,7 @@ class _SplashPageState extends State<SplashPage> {
                   child: Card(
                     elevation: 15,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadiusGeometry.circular(36)
+                      borderRadius: BorderRadiusGeometry.circular(36),
                     ),
                     child: Center(
                       child: Image.asset(
@@ -45,8 +57,11 @@ class _SplashPageState extends State<SplashPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 12,),
-                Text("Expenso", style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),)
+                SizedBox(height: 12),
+                Text(
+                  "Expenso",
+                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold),
+                ),
               ],
             ),
           ),
@@ -55,40 +70,49 @@ class _SplashPageState extends State<SplashPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text.rich(TextSpan(
-                  text: "Powered by ",
-                  style: TextStyle(fontSize: 15, color: Colors.black54, ),
-                  children: [
-                    TextSpan(text: "Accurate-Info", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black))
-                  ]
-                )),
+                Text.rich(
+                  TextSpan(
+                    text: "Powered by ",
+                    style: TextStyle(fontSize: 15, color: Colors.black54),
+                    children: [
+                      TextSpan(
+                        text: "Accurate-Info",
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 /*Container(height: 1.8, width: 240, margin: EdgeInsets.symmetric(vertical: 3), color: Colors.black54,),*/
                 // Or use Divider() to get a divider line in between the components
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 90),
-                  child: Divider(height: 6, thickness: 1.5, color: Colors.black54,),
+                  child: Divider(
+                    height: 6,
+                    thickness: 1.5,
+                    color: Colors.black54,
+                  ),
                 ),
-                Text("Version 1.0.0", style: TextStyle(fontSize: 12, color: Colors.black54, letterSpacing: 3),),
-                SizedBox(height: 24,)
+                Text(
+                  "Version 1.0.0",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.black54,
+                    letterSpacing: 3,
+                  ),
+                ),
+                SizedBox(height: 24),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 /*
 import 'dart:async';

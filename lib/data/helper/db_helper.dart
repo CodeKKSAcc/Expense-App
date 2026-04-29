@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:expense_app/data/model/user_model.dart';
+import 'package:expense_app/domain/constants/app_constants.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DBHelper {
@@ -147,6 +149,8 @@ class DBHelper {
     }
 
     else{
+      SharedPreferences myPref = await SharedPreferences.getInstance();
+      myPref.setInt(AppConstants.pref_user_key, myUser[0][column_user_id]);
       return 3;
     }
   }

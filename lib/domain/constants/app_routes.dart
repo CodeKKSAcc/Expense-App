@@ -3,6 +3,7 @@
 import 'package:expense_app/user_interface/pages/dashboard/dashboard_page_ui.dart';
 import 'package:expense_app/home_page.dart';
 import 'package:expense_app/intro_page.dart';
+import 'package:expense_app/user_interface/pages/dashboard/navigation_page/home_nav_page.dart';
 import 'package:expense_app/user_interface/pages/on_boarding/signup_page/signup_page.dart';
 import 'package:expense_app/user_interface/pages/splash/splash_page.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,7 +22,7 @@ class AppRoutes {
     splashPage : (context) => SplashPage(),
     loginPage : (context) => LoginPage(),
     signupPage : (context) => SignupPage(),
-    homePage : (context) => HomePage(),
+    homePage : (context) => HomeNavPage(),
     dashboardPage : (context) => DashboardPage(),
     introPage : (context) => IntroPage(),
   };

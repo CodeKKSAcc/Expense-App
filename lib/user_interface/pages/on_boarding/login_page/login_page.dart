@@ -5,7 +5,6 @@ import 'package:expense_app/user_interface/pages/on_boarding/bloc/user_event.dar
 import 'package:expense_app/user_interface/pages/on_boarding/bloc/user_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../bloc/user_bloc.dart';
 
 class LoginPage extends StatelessWidget {
@@ -15,7 +14,7 @@ class LoginPage extends StatelessWidget {
   bool isPasswordVisible = false;
 
   bool isLoading = false;
-  bool loggedIn = true;
+  bool isLogin = true;
 
   GlobalKey<FormState> loginKey = GlobalKey<FormState>();
 
@@ -84,6 +83,17 @@ class LoginPage extends StatelessWidget {
                 ),
                 SizedBox(height: 15),
                 BlocConsumer<UserBloc, UserState>(
+
+                  buildWhen: (previousState, currentState){
+                    return isLogin;
+                  },// Whenever we are performing sign-in isLogin->false, thereby buildWhen returns false,
+                  // thereby for signup even if BlocConsumer receives states(UserSuccessState) from signup page it won't build.
+                  // This is used so that states from both pages(login and signup) doesn't gets mixed up.
+
+                  listenWhen: (previousState, currentState){
+                    return  isLogin;
+                  },
+
                   listener: (context, state) {
                     if (state is UserLoadingState) {
                       isLoading = true;
@@ -99,14 +109,13 @@ class LoginPage extends StatelessWidget {
                     }
                     if (state is UserSuccessState) {
                       isLoading = false;
-                      confirmLogin(loggedIn);
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text("User authenticated successfully !!!"),
                           backgroundColor: Colors.green,
                         ),
                       );
-                      Navigator.pushNamed(context, AppRoutes.homePage);
+                      Navigator.pushNamed(context, AppRoutes.dashboardPage);
                     }
                   },
                   builder: (context, state) {
@@ -115,6 +124,7 @@ class LoginPage extends StatelessWidget {
                       title: isLoading ? "Authenticating User..." : "Login",
                       onTap: () {
                         if (loginKey.currentState!.validate()) {
+                          isLogin = true;
                           context.read<UserBloc>().add(
                             UserLoginEvent(
                               email: emailControl.text,
@@ -130,6 +140,7 @@ class LoginPage extends StatelessWidget {
                 Center(
                   child: InkWell(
                     onTap: () {
+                      isLogin = false;
                       Navigator.pushNamed(context, AppRoutes.signupPage);
                     },
                     child: Text.rich(
@@ -158,10 +169,6 @@ class LoginPage extends StatelessWidget {
     );
   }
 
-  Future<bool> confirmLogin(bool isLoggedIn) async{
-    SharedPreferences getPref = await SharedPreferences.getInstance();
-    return await getPref.setBool("loggedIn", isLoggedIn);
-  }
 }
 
 /*
