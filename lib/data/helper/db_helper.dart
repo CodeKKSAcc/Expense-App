@@ -73,7 +73,7 @@ class DBHelper {
           "$column_expense_catagory_id integer,"
           "$column_expense_amount real, "
           "$column_expense_created_at text, "
-          "$column_expense_type integer)",
+          "$column_expense_type integer)",   /// 0-> Debit, 1-> Credit
         );
       },
     );

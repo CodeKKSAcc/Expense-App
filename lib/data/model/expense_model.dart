@@ -17,7 +17,7 @@ class ExpenseModel {
     required this.amount,
   });
 
-  Map<String, dynamic> toEMap(){
+  Map<String, dynamic> toExpenseMap(){
     return {
       DBHelper.column_user_id : uid,
       DBHelper.column_expense_catagory_id : catagoryId,
@@ -29,7 +29,7 @@ class ExpenseModel {
     };
   }
 
-  ExpenseModel toEModel(Map<String, dynamic> myMap){
+  ExpenseModel toExpenseModel(Map<String, dynamic> myMap){
     return ExpenseModel(
         eid: myMap[DBHelper.column_expense_id],
         uid: myMap[DBHelper.column_user_id],

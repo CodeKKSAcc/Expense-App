@@ -5,7 +5,7 @@ InputDecoration myIpDecoration({
   required String myLabelText,
   bool isPasswordField = false,
   bool isPasswordVisible = false,
-  VoidCallback? onTap,// or   void Function() onTap;
+  VoidCallback? onTap, // or   void Function() onTap;
 }) {
   return InputDecoration(
     hintText: myHintText,
@@ -16,7 +16,8 @@ InputDecoration myIpDecoration({
             icon: isPasswordVisible
                 ? Icon(Icons.visibility)
                 : Icon(Icons.visibility_off),
-          ) : null,
+          )
+        : null,
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
       borderSide: BorderSide(color: Colors.pinkAccent, width: 2.4),
