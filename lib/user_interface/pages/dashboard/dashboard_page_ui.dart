@@ -15,7 +15,7 @@ class _DashboardPageState extends State<DashboardPage> {
   List<Widget> myNavPages = [
     HomeNavPage(),
     ChartNavPage(),
-    AddExpensePage(),
+    AddExpensePage(toUpdate: false, index: 0,),
     NotificationNavPage(),
     AboutNavPage(),
   ];
@@ -29,7 +29,7 @@ class _DashboardPageState extends State<DashboardPage> {
       bottomNavigationBar: BottomNavigationBar(
         onTap: (value) {
           if (value == 2) {
-            Navigator.pushNamed(context, AppRoutes.addExpensePage);
+            Navigator.pushNamed(context, AppRoutes.addExpensePage, arguments: [false]);
           } else {
             selectedNavIndex = value;
             setState(() {});

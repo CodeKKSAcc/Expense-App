@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:expense_app/data/model/expense_model.dart';
 import 'package:expense_app/data/model/user_model.dart';
 import 'package:expense_app/domain/constants/app_constants.dart';
 import 'package:path/path.dart';
@@ -37,7 +38,7 @@ class DBHelper {
   static String column_expense_amount = "e_amount";
   static String column_expense_created_at = "e_created_at";
   static String column_expense_catagory_id = "e_category_id";
-  static String column_expense_type = "e_type";
+  static String column_expense_type = "e_type"; // 0-> Debit, 1-> Credit
 
   Future<Database> initDB() async {
     myDB ??= await openDB();
@@ -73,7 +74,7 @@ class DBHelper {
           "$column_expense_catagory_id integer,"
           "$column_expense_amount real, "
           "$column_expense_created_at text, "
-          "$column_expense_type integer)",   /// 0-> Debit, 1-> Credit
+          "$column_expense_type integer)",
         );
       },
     );
@@ -126,7 +127,10 @@ class DBHelper {
   // 2-> Incorrect password
   // 3-> Authenticated/varified user
 
-  Future<int> authUser({required String email, required String password}) async {
+  Future<int> authUser({
+    required String email,
+    required String password,
+  }) async {
     Database dbReference = await initDB();
     List<Map<String, dynamic>> myUser = await dbReference.query(
       table_user,
@@ -134,21 +138,19 @@ class DBHelper {
       whereArgs: [email, password],
     );
 
-    if(myUser.isEmpty){
+    if (myUser.isEmpty) {
       List<Map<String, dynamic>> emailUser = await dbReference.query(
         table_user,
         where: "$column_user_email = ?",
         whereArgs: [email],
       );
 
-      if(emailUser.isNotEmpty){
+      if (emailUser.isNotEmpty) {
         return 2;
-      } else{
+      } else {
         return 1;
       }
-    }
-
-    else{
+    } else {
       SharedPreferences myPref = await SharedPreferences.getInstance();
       myPref.setInt(AppConstants.pref_user_key, myUser[0][column_user_id]);
       return 3;
@@ -165,7 +167,7 @@ class DBHelper {
     return myUsers.isNotEmpty;
   }
 
-/*Future<bool> doesPasswordMatched({required String password}) async {
+  /*Future<bool> doesPasswordMatched({required String password}) async {
     Database dbReference = await initDB();
     List<Map<String, dynamic>> myUserPass = await dbReference.query(
       table_user,
@@ -174,4 +176,47 @@ class DBHelper {
     );
     return myUserPass.isNotEmpty;
   }*/
+
+  // Expense
+  // Add/Insert Expense
+  Future<bool> addExpense({required ExpenseModel expModel}) async {
+    Database dbReference = await initDB();
+    int rowsEff = await dbReference.insert(
+      table_expense,
+      expModel.toExpenseMap(),
+    );
+    return rowsEff > 0;
+  }
+
+  Future<List<ExpenseModel>> fetchAllExpense() async {
+    Database dbReference = await initDB();
+    List<Map<String, dynamic>> myDbMap = await dbReference.query(table_expense);
+    List<ExpenseModel> myModel = [];
+
+    for (Map<String, dynamic> newMap in myDbMap) {
+      myModel.add(ExpenseModel.toExpenseModel(newMap));
+    }
+    return myModel;
+  }
+
+  Future<bool> deleteExpense({required int expId}) async {
+    Database dbReference = await initDB();
+    int rowsEff = await dbReference.delete(
+      table_expense,
+      where: "$column_expense_id = ?",
+      whereArgs: [expId],
+    );
+    return rowsEff > 0;
+  }
+
+  Future<bool> updateExpense({required ExpenseModel updateExp}) async {
+    Database dbReference = await initDB();
+    int rowsEff = await dbReference.update(
+      table_expense,
+      updateExp.toExpenseMap(),
+      where: "$column_expense_id = ?",
+      whereArgs: [updateExp.eid!],
+    );
+    return rowsEff > 0;
+  }
 }

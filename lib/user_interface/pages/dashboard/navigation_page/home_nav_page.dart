@@ -1,7 +1,93 @@
-
-
+import 'package:expense_app/data/model/expense_model.dart';
+import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_bloc.dart';
+import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_event.dart';
+import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../add_expense/add_expense.dart';
+
+class HomeNavPage extends StatefulWidget {
+  const HomeNavPage({super.key});
+
+  @override
+  State<HomeNavPage> createState() => _HomeNavPageState();
+}
+
+class _HomeNavPageState extends State<HomeNavPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ExpenseBloc>().add(FetchExpenseEvent());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text("Home Page"), centerTitle: true),
+      body: BlocBuilder<ExpenseBloc, ExpenseState>(
+        builder: (context, state) {
+          if (state is ExpenseLoadingState) {
+            return Center(child: CircularProgressIndicator());
+          }
+
+          if (state is ExpenseLoadedState) {
+            return state.allExpenses.isNotEmpty
+                ? ListView.builder(
+              itemCount: state.allExpenses.length,
+                    itemBuilder: (context, index) {
+                      ExpenseModel eachExpense = state.allExpenses[index];
+                      return Card(child: ListTile(
+                        title: Row(
+                          //mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(eachExpense.title),
+                            Text("${eachExpense.amount}")
+                          ],
+                        ),
+                        subtitle: Text(eachExpense.remark),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(width: 15,),
+                            IconButton(onPressed: (){
+                              context.read<ExpenseBloc>().add(DeleteExpenseEvent(expenseId: eachExpense.eid ?? 0));
+                              setState(() {
+
+                              });
+                            }, icon: Icon(Icons.delete, color: Colors.red,)),
+                            IconButton(onPressed: (){
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=> AddExpensePage(toUpdate: true, index: index, eid: state.allExpenses[index].eid !,)));
+                            }, icon: Icon(Icons.edit, color: Colors.green,))
+                          ],
+                        ),
+                      ));
+                    },
+                  )
+                : Center(
+                    child: Text(
+                      "No Expenses Yet !!!",
+                      style: TextStyle(
+                        fontSize: 27,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+          }
+
+          if (state is ExpenseErrorState) {
+            return Center(child: Text(state.errorMsg));
+          }
+
+          return Container();
+        },
+      ),
+    );
+  }
+}
+
+/*
 class HomeNavPage extends StatelessWidget {
 
   @override
@@ -339,3 +425,4 @@ class HomeNavPage extends StatelessWidget {
     );
   }
 }
+*/
