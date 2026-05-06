@@ -115,7 +115,7 @@ class LoginPage extends StatelessWidget {
                           backgroundColor: Colors.green,
                         ),
                       );
-                      Navigator.pushNamed(context, AppRoutes.dashboardPage);
+                      Navigator.pushReplacementNamed(context, AppRoutes.dashboardPage);
                     }
                   },
                   builder: (context, state) {

@@ -1,90 +1,164 @@
+import 'dart:math';
+
+import 'package:expense_app/data/model/category_model.dart';
 import 'package:expense_app/data/model/expense_model.dart';
+import 'package:expense_app/data/model/filter_expense_model.dart';
+import 'package:expense_app/domain/constants/app_constants.dart';
 import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_bloc.dart';
 import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_event.dart';
 import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../add_expense/add_expense.dart';
+import 'package:intl/intl.dart';
 
 class HomeNavPage extends StatefulWidget {
-  const HomeNavPage({super.key});
+    const HomeNavPage({super.key});
 
-  @override
-  State<HomeNavPage> createState() => _HomeNavPageState();
+    @override
+    State<HomeNavPage> createState() => _HomeNavPageState();
 }
 
 class _HomeNavPageState extends State<HomeNavPage> {
-  @override
-  void initState() {
-    super.initState();
-    context.read<ExpenseBloc>().add(FetchExpenseEvent());
-  }
+    @override
+    void initState() {
+        super.initState();
+        context.read<ExpenseBloc>().add(FetchExpenseEvent());
+    }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Home Page"), centerTitle: true),
-      body: BlocBuilder<ExpenseBloc, ExpenseState>(
-        builder: (context, state) {
-          if (state is ExpenseLoadingState) {
-            return Center(child: CircularProgressIndicator());
-          }
+    DateFormat myDf = DateFormat.yMMMMEEEEd();
 
-          if (state is ExpenseLoadedState) {
-            return state.allExpenses.isNotEmpty
-                ? ListView.builder(
-              itemCount: state.allExpenses.length,
-                    itemBuilder: (context, index) {
-                      ExpenseModel eachExpense = state.allExpenses[index];
-                      return Card(child: ListTile(
-                        title: Row(
-                          //mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(eachExpense.title),
-                            Text("${eachExpense.amount}")
-                          ],
-                        ),
-                        subtitle: Text(eachExpense.remark),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(width: 15,),
-                            IconButton(onPressed: (){
-                              context.read<ExpenseBloc>().add(DeleteExpenseEvent(expenseId: eachExpense.eid ?? 0));
-                              setState(() {
+    // Month Wise, Year Wise, Category Wise filtering
+    List<String> filterType = ["Month Wise" , "Year Wise"];
+    int filterTypeIndex = 0;
 
-                              });
-                            }, icon: Icon(Icons.delete, color: Colors.red,)),
-                            IconButton(onPressed: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=> AddExpensePage(toUpdate: true, index: index, eid: state.allExpenses[index].eid !,)));
-                            }, icon: Icon(Icons.edit, color: Colors.green,))
-                          ],
-                        ),
-                      ));
+    @override
+    Widget build(BuildContext context) {
+        return Scaffold(
+            appBar: AppBar( actions: [
+
+                StatefulBuilder(
+                    builder: (context, mySs) {
+                        return DropdownButton(
+                            items: List.generate(filterType.length, (index){
+                                return DropdownMenuItem(child: Text(filterType[index]), value: index,);
+                            }),
+                            value: filterTypeIndex,
+                            onChanged: (value) {
+                                filterTypeIndex = value!;
+                                mySs(() {});
+                                context.read<ExpenseBloc>().add(FetchExpenseEvent(filterType: filterTypeIndex));
+                            },
+                        );
                     },
-                  )
-                : Center(
-                    child: Text(
-                      "No Expenses Yet !!!",
-                      style: TextStyle(
-                        fontSize: 27,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-          }
+                ),
 
-          if (state is ExpenseErrorState) {
-            return Center(child: Text(state.errorMsg));
-          }
 
-          return Container();
-        },
-      ),
-    );
-  }
+                SizedBox(height: 27,),
+            ],),
+            body: BlocBuilder<ExpenseBloc, ExpenseState>(
+                builder: (context, state) {
+                    if (state is ExpenseLoadingState) {
+                        return Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state is ExpenseLoadedState) {
+                        return state.allExpenses.isNotEmpty
+                            ? ListView.builder(
+                                itemCount: state.allExpenses.length,
+                                itemBuilder: (context, index) {
+
+                                    FilterExpenseModel eachFilteredExpense = state.allExpenses[index];
+
+                                    return Container(
+                                        padding: EdgeInsets.all(6),
+                                        margin: EdgeInsets.all(9),
+                                        width: double.infinity,
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadiusGeometry.circular(12),
+                                            border: BoxBorder.all()
+                                        ),
+                                        child: Column(
+                                            children: [
+                                                Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                        Text(eachFilteredExpense.title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                                        Text(eachFilteredExpense.balence.toString(), style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold))
+                                                    ],
+                                                ),
+                                                SizedBox(height: 12,),
+                                                Divider(),
+                                                ListView.builder(
+                                                    physics: NeverScrollableScrollPhysics(),
+                                                    padding: EdgeInsets.zero,
+                                                    itemCount: eachFilteredExpense.myExp.length,
+                                                    shrinkWrap: true,
+                                                    itemBuilder: (context, childIndex) {
+
+                                                        ExpenseModel eachExp = eachFilteredExpense.myExp[childIndex];
+
+                                                        String eachExpCatImage = "";
+                                                      /*CategoryModel expCatModel = AppConstants.myCategory.where((e){
+                                                          return e.id ==  eachExp.categoryId ;
+                                                      }).toList()[0] ;*/
+                                                        // Or just
+                                                        CategoryModel expCatModel = AppConstants.myCategory.firstWhere((e) {
+                                                                return e.id == eachExp.categoryId;
+                                                            });
+
+                                                        eachExpCatImage = expCatModel.imagePath;
+
+                                                        return ListTile(
+                                                            titleTextStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, fontFamily: "Poppins", color: Colors.black),
+                                                            subtitleTextStyle: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, fontFamily: "Poppins", color: Colors.black54),
+                                                            contentPadding: EdgeInsets.zero,
+                                                            leading: Container(
+                                                                alignment: Alignment(0, 0),
+                                                                height: 60,
+                                                                width: 60,
+                                                                decoration: BoxDecoration(
+                                                                    color: Colors.primaries[Random().nextInt(Colors.primaries.length)].shade100,
+                                                                    borderRadius: BorderRadius.circular(9),
+                                                                    image: DecorationImage(image: AssetImage(eachExpCatImage,), fit: BoxFit.fill)
+                                                                ),
+                                                            ),
+                                                            title: Row(
+                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                children: [
+                                                                    Text(eachFilteredExpense.title),
+                                                                    Text(eachFilteredExpense.balence.toString(), style: TextStyle(
+                                                                        color: eachExp.type ==  0 ? Colors.red :
+                                                                        Colors.green))
+                                                                ],
+                                                            ),
+                                                            subtitle: Text(eachExp.remark),
+                                                        );
+                                                    })
+                                            ],
+                                        ),
+                                    );
+                                },
+                            )
+                            : Center(
+                                child: Text(
+                                    "No Expenses Yet !!!",
+                                    style: TextStyle(
+                                        fontSize: 27,
+                                        fontWeight: FontWeight.bold,
+                                    ),
+                                ),
+                            );
+                    }
+
+                    if (state is ExpenseErrorState) {
+                        return Center(child: Text(state.errorMsg));
+                    }
+
+                    return Container();
+                },
+            ),
+        );
+    }
 }
 
 /*

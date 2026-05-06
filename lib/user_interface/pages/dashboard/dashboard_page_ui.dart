@@ -15,7 +15,7 @@ class _DashboardPageState extends State<DashboardPage> {
   List<Widget> myNavPages = [
     HomeNavPage(),
     ChartNavPage(),
-    AddExpensePage(toUpdate: false, index: 0,),
+    AddExpensePage(),
     NotificationNavPage(),
     AboutNavPage(),
   ];

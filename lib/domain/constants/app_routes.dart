@@ -23,6 +23,6 @@ class AppRoutes {
     homePage : (context) => HomeNavPage(),
     dashboardPage : (context) => DashboardPage(),
     introPage : (context) => IntroPage(),
-    addExpensePage : (context) => AddExpensePage(toUpdate: false, index: 0,)
+    addExpensePage : (context) => AddExpensePage()
   };
 }

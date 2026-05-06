@@ -10,11 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AddExpensePage extends StatelessWidget {
-  bool toUpdate;
-
-  int index, eid;
-
-  AddExpensePage({required this.toUpdate, required this.index, this.eid = 0});
 
   TextEditingController titleControl = TextEditingController();
   TextEditingController remarkController = TextEditingController();
@@ -33,32 +28,17 @@ class AddExpensePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(toUpdate ? "Update Expense" : "Add Expense"),
+        title: Text("Add Expense"),
         centerTitle: true,
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12),
-        child: toUpdate
-            ? BlocBuilder<ExpenseBloc, ExpenseState>(
-                builder: (context, state) {
-                  if (state is ExpenseLoadingState) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-                  if (state is ExpenseLoadedState) {
-                    if (toUpdate) {
-                      titleControl.text = state.allExpenses[index].title;
-                      remarkController.text = state.allExpenses[index].remark;
-                      amountController.text = state.allExpenses[index].amount
-                          .toString();
-                      selectedTypeIndex = state.allExpenses[index].type;
-                    }
-                  }
-                  return updateUi(toUpdate: true);
-                },
-              )
-            : updateUi(toUpdate: toUpdate),
-      ),
-    );
+          padding: EdgeInsets.symmetric(horizontal: 12),
+          child: BlocBuilder<ExpenseBloc, ExpenseState>(
+            builder: (context, state) {
+              return updateUi(toUpdate: true);
+            },
+          ),
+    ),);
   }
 
   Widget updateUi({required bool toUpdate}) {
@@ -169,9 +149,9 @@ class AddExpensePage extends StatelessWidget {
                               child: GridView.builder(
                                 itemCount: AppConstants.myCategory.length,
                                 gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: 4,
-                                    ),
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 4,
+                                ),
                                 itemBuilder: (context, index) {
                                   return InkWell(
                                     onTap: () {
@@ -218,21 +198,22 @@ class AddExpensePage extends StatelessWidget {
                   ),
                   child: selectedCategoryIndex >= 0
                       ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Image.asset(
-                              AppConstants
-                                  .myCategory[selectedCategoryIndex]
-                                  .imagePath,
-                              height: 51,
-                              width: 51,
-                            ),
-                            SizedBox(width: 27),
-                            Text(
-                              "- ${AppConstants.myCategory[selectedCategoryIndex].title}",
-                            ),
-                          ],
-                        )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        AppConstants
+                            .myCategory[selectedCategoryIndex]
+                            .imagePath,
+                        height: 51,
+                        width: 51,
+                      ),
+                      SizedBox(width: 27),
+                      Text(
+                        "- ${AppConstants.myCategory[selectedCategoryIndex]
+                            .title}",
+                      ),
+                    ],
+                  )
                       : Text("Chose Category"),
                 ),
               );
@@ -243,12 +224,19 @@ class AddExpensePage extends StatelessWidget {
             builder: (context, sS) {
               return InkWell(
                 onTap: () async {
-                  myDateTime = await showDatePicker(
+                  DateTime? userSelectedDate = await showDatePicker(
+                    currentDate: myDateTime ?? DateTime.now(),
                     context: context,
                     firstDate: DateTime.now().subtract(Duration(days: 366)),
                     // DateTime(2024)
                     lastDate: DateTime.now(),
                   );
+                  if(userSelectedDate != null){
+                    myDateTime = userSelectedDate;
+                  }
+                  else{
+                    myDateTime ??= DateTime.now();
+                  }
                   sS(() {});
                 },
                 child: Container(
@@ -260,7 +248,8 @@ class AddExpensePage extends StatelessWidget {
                     border: Border.all(width: 1.5),
                   ),
                   child: Text(
-                    "Created Time  -   ${myDf.format(myDateTime ?? DateTime.now())}",
+                    "Created Time  -   ${myDf.format(
+                        myDateTime ?? DateTime.now())}",
                   ),
                 ),
               );
@@ -276,7 +265,9 @@ class AddExpensePage extends StatelessWidget {
                 isLoading = false;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text("Expense ${toUpdate? "Updated" : "Added"} Successfully..."),
+                    content: Text("Expense ${toUpdate
+                        ? "Updated"
+                        : "Added"} Successfully..."),
                     backgroundColor: Colors.green,
                   ),
                 );
@@ -298,46 +289,26 @@ class AddExpensePage extends StatelessWidget {
                 onPressed: () async {
                   if (selectedCategoryIndex >= 0) {
                     SharedPreferences myPref =
-                        await SharedPreferences.getInstance();
+                    await SharedPreferences.getInstance();
 
-                    toUpdate
-                        ? context.read<ExpenseBloc>().add(
-                            UpdateExpenseEvent(
-                              updateExpenseModel: ExpenseModel(
-                                eid: eid,
-                                uid:
-                                    myPref.getInt(AppConstants.pref_user_key) ??
-                                    0,
-                                categoryId: AppConstants
-                                    .myCategory[selectedCategoryIndex]
-                                    .id,
-                                createdAt: (myDateTime ?? DateTime.now())
-                                    .millisecondsSinceEpoch,
-                                type: selectedTypeIndex,
-                                title: titleControl.text,
-                                remark: remarkController.text,
-                                amount: num.parse(amountController.text),
-                              ),
-                            ),
-                          )
-                        : context.read<ExpenseBloc>().add(
-                            AddExpenseEvent(
-                              newExpenseModel: ExpenseModel(
-                                uid:
-                                    myPref.getInt(AppConstants.pref_user_key) ??
-                                    0,
-                                categoryId: AppConstants
-                                    .myCategory[selectedCategoryIndex]
-                                    .id,
-                                createdAt: (myDateTime ?? DateTime.now())
-                                    .millisecondsSinceEpoch,
-                                type: selectedTypeIndex,
-                                title: titleControl.text,
-                                remark: remarkController.text,
-                                amount: num.parse(amountController.text),
-                              ),
-                            ),
-                          );
+                    context.read<ExpenseBloc>().add(
+                      AddExpenseEvent(
+                        newExpenseModel: ExpenseModel(
+                          uid:
+                          myPref.getInt(AppConstants.pref_user_key) ??
+                              0,
+                          categoryId: AppConstants
+                              .myCategory[selectedCategoryIndex]
+                              .id,
+                          createdAt: (myDateTime ?? DateTime.now())
+                              .millisecondsSinceEpoch,
+                          type: selectedTypeIndex,
+                          title: titleControl.text,
+                          remark: remarkController.text,
+                          amount: num.parse(amountController.text),
+                        ),
+                      ),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
@@ -350,29 +321,29 @@ class AddExpensePage extends StatelessWidget {
                 ),
                 child: isLoading
                     ? Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 6),
-                            child: CircularProgressIndicator(),
-                          ),
-                          SizedBox(width: 12),
-                          Text(
-                            "${toUpdate ? "Updating" : "Adding"} Expenses...",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Text(
-                        "${toUpdate ? "Update" : "Add"} Expense",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      child: CircularProgressIndicator(),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      "Adding Expenses...",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
+                    ),
+                  ],
+                )
+                    : Text(
+                  "Add Expense",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               );
             },
           ),

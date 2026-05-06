@@ -8,7 +8,11 @@ class AddExpenseEvent extends ExpenseEvent{
   AddExpenseEvent({required this.newExpenseModel});
 }
 
-class FetchExpenseEvent extends ExpenseEvent{}
+class FetchExpenseEvent extends ExpenseEvent{
+  int filterType; // 0 = Month, 1 = Year
+
+  FetchExpenseEvent({this.filterType = 0});
+}
 
 class DeleteExpenseEvent extends ExpenseEvent{
   int expenseId;
