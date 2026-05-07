@@ -5,6 +5,10 @@ import 'package:expense_app/user_interface/pages/dashboard/navigation_page/chart
 import 'package:expense_app/user_interface/pages/dashboard/navigation_page/home_nav_page.dart';
 import 'package:expense_app/user_interface/pages/dashboard/navigation_page/notification_nav_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../add_expense/expense_bloc/expense_bloc.dart';
+import '../add_expense/expense_bloc/expense_event.dart';
 
 class DashboardPage extends StatefulWidget {
   @override
@@ -21,6 +25,13 @@ class _DashboardPageState extends State<DashboardPage> {
   ];
 
   int selectedNavIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<ExpenseBloc>().add(FetchExpenseEvent());
+  }// All other pages are present inside DashboardPage(), so fetching data in
+  // DashboardPage() so that the fetched data is available to all other pages.
 
   @override
   Widget build(BuildContext context) {

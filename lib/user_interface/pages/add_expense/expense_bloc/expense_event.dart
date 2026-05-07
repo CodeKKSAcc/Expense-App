@@ -9,7 +9,7 @@ class AddExpenseEvent extends ExpenseEvent{
 }
 
 class FetchExpenseEvent extends ExpenseEvent{
-  int filterType; // 0 = Month, 1 = Year
+  int filterType; // 0 = Date, 1 = Month, 2 = Year
 
   FetchExpenseEvent({this.filterType = 0});
 }

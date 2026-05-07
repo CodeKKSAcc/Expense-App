@@ -1,6 +1,109 @@
 
-import 'package:flutter/material.dart';
+import 'dart:math';
 
+import 'package:expense_app/data/model/filter_expense_model.dart';
+import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_bloc.dart';
+import 'package:expense_app/user_interface/pages/add_expense/expense_bloc/expense_state.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class ChartNavPage extends StatefulWidget {
+  @override
+  State<ChartNavPage> createState() => _ChartNavPageState();
+}
+
+class _ChartNavPageState extends State<ChartNavPage> {
+
+  List<Map<String, dynamic>> calculatePerrcentageByCatExp(List<FilterExpenseModel> myExp){
+
+    List<Map<String, dynamic>> catPercentage = [];
+
+    double totalExp = 0.0;
+
+    for(FilterExpenseModel eachCatFilter in myExp){
+
+      totalExp += eachCatFilter.balence.abs();
+    }
+
+
+    for(FilterExpenseModel eachCatFilter in myExp){
+      catPercentage.add({
+        "percentage" : eachCatFilter.balence.abs() / totalExp.abs(),
+        "title" : eachCatFilter.title
+      });
+    }
+
+    return catPercentage;
+
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: BlocBuilder<ExpenseBloc, ExpenseState>(
+          builder: (context, state) {
+            if(state is ExpenseLoadingState){
+              return Center(child: CircularProgressIndicator(),);
+            }
+            if(state is ExpenseErrorState){
+              return Center(child: Text(state.errorMsg));
+            }
+            if(state is ExpenseLoadedState){
+
+              List<Map<String, dynamic>> catPercentage = calculatePerrcentageByCatExp(state.allExpenses);
+
+              return Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 180,),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: 3),
+                    child: Text("Spending Details", style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),),
+                  ),
+                  Text("Your expenses are divided in 6 categories", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.black54),),
+                  SizedBox(height: 15,),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      children: catPercentage.map((e){
+                        return Expanded(
+                            flex: (e["percentage"] * 100).toInt(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  alignment: Alignment(0, 0),
+                                  height: 27,
+                                  color: Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                                  child: Text("${(e["percentage"] * 100).toInt()}%", style: TextStyle(fontSize: 12, color: Colors.white),),
+                                ),
+                                SizedBox(height: 6,),
+                                Text("${e["title"]}", style: TextStyle(fontSize: 12),)
+                                /*Text("${(e["percentage"] * 100).toInt()}%", style: TextStyle(fontSize: 12),)*/
+                              ],
+                            ));
+                      }).toList(),
+                    ),
+                  )
+                ],
+              );
+            }
+            return Container();
+          }
+        ),
+      ),
+    );
+  }
+}
+
+
+
+/*
 class ChartNavPage extends StatelessWidget {
   const ChartNavPage({super.key});
 
@@ -330,4 +433,4 @@ class ChartNavPage extends StatelessWidget {
       ),
     );
   }
-}
+}*/
