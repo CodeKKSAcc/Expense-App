@@ -18,6 +18,9 @@ class ExpenseBloc extends Bloc<ExpenseEvent, ExpenseState>{
                 bool isAdded = await dbHelper.addExpense(expModel: event.newExpenseModel);
 
                 if (isAdded) {
+
+                  bool isBalanceUpdated = await dbHelper.updateBalence(expModel: event.newExpenseModel);
+
                     List<ExpenseModel> allExp = await dbHelper.fetchAllExpense();
                     emit(ExpenseLoadedState(
                             allExpenses: filterExpenseByType(allExpenses: allExp)));
